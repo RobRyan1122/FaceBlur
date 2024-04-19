@@ -18,4 +18,4 @@ def detect_and_draw_faces(resized_image):
         pixelated_roi = cv2.resize(pixelated_roi, (w, h), interpolation=cv2.INTER_NEAREST)
         resized_image[y:y + h, x:x + w] = pixelated_roi
 
-    cv2.imshow('Gray Image', gray_image)
+    #cv2.imshow('Gray Image', gray_image)

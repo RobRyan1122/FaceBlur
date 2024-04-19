@@ -1,9 +1,16 @@
 import cv2
 import FaceDetection
+import LoadIM
+from LoadIM import load_image
+
 
 face_cascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
 # Read a PNG image
-image = cv2.imread('groupPhoto.PNG')
+
+
+image = load_image()
+
+
 # Define the desired maximum width and height for the window
 max_width = 800
 max_height = 600
