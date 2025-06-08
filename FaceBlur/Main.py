@@ -1,46 +1,51 @@
 import cv2
+import os
+import tkinter as tk
+from tkinter import filedialog
 import FaceDetection
-import LoadIM
-from LoadIM import load_image
 
+# Hide the main Tk window
+tk.Tk().withdraw()
 
-face_cascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
-# Read a PNG image
+# Let the user select a folder
+folder_path = filedialog.askdirectory(title="Select Folder with Images")
 
+if not folder_path:
+    print("No folder selected.")
+    exit()
 
-image = load_image()
+# Output folder
+output_folder = os.path.join(folder_path, "processed")
+os.makedirs(output_folder, exist_ok=True)
 
+# Valid image extensions
+valid_exts = [".jpg", ".jpeg", ".png", ".bmp"]
 
-# Define the desired maximum width and height for the window
-max_width = 800
-max_height = 600
+# Loop through all images in the folder
+for filename in os.listdir(folder_path):
+    if any(filename.lower().endswith(ext) for ext in valid_exts):
+        image_path = os.path.join(folder_path, filename)
+        image = cv2.imread(image_path)
 
-# Get the original image dimensions
-original_height, original_width = image.shape[:2]
+        if image is None:
+            print(f"Could not load {filename}")
+            continue
 
-# Calculate the scaling factor for width and height
-width_scale = max_width / original_width
-height_scale = max_height / original_height
+        # Resize logic
+        max_width = 800
+        max_height = 600
+        original_height, original_width = image.shape[:2]
+        width_scale = max_width / original_width
+        height_scale = max_height / original_height
+        scale = min(width_scale, height_scale)
+        resized_image = cv2.resize(image, None, fx=scale, fy=scale)
 
-# Choose the minimum scaling factor to maintain aspect ratio
-scale = min(width_scale, height_scale)
+        # Apply face detection + pixelation
+        FaceDetection.detect_and_draw_faces(resized_image)
 
-# Resize the image with the chosen scale
-resized_image = cv2.resize(image, None, fx=scale, fy=scale)
+        # Save processed image
+        output_path = os.path.join(output_folder, f"blurred_{filename}")
+        cv2.imwrite(output_path, resized_image)
+        print(f"Processed: {filename}")
 
-FaceDetection.detect_and_draw_faces(resized_image)
-
-# Convert the image to grayscale
-#gray_image = cv2.cvtColor(resized_image, cv2.COLOR_BGR2GRAY)
-#faces = face_cascade.detectMultiScale(gray_image,1.1,5,)
-
-#for(x,y,w,h) in faces:
-  #  cv2.rectangle(resized_image, (x, y), (x+w, y+h), (255, 0, 0), 3)
-
-
-# Display the image
-# Display the resized image in a window with the original aspect ratio
-cv2.imshow('Resized Image', resized_image)
-
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+print("Done.")
